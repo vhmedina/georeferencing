@@ -16,12 +16,26 @@ library(ggmap)
 # Get the names of each place
 Sys.setlocale("LC_ALL", "pt_PT.UTF-8")
 data=read_xml("http://web.servel.cl/archivos.xml")
+comunas=data %>% xml_find_all("//archcomuna")
 nom_comunas=data %>% xml_find_all("//nomcomuna")
 lista_nom_comunas=xml_text(nom_comunas)
 head(lista_nom_comunas)
+lista_comunas=xml_text(comunas)
+head(lista_comunas)
+url_base="http://web.servel.cl/padron/"
+
+# Just an example of two counties
 lista_nom_comunas=lista_nom_comunas[which(lista_nom_comunas %in% c("La Florida","Puerto Varas"))]
+lista_comunas=lista_comunas[which(lista_nom_comunas %in% c("La Florida","Puerto Varas"))]
+
+# Save .pdf in local machine
+for(i in 1:length(lista_comunas)){
+  archivo=lista_comunas[i]
+  nombre=lista_nom_comunas[i]
+  download.file(paste0(url_base,archivo),paste0(nombre,".pdf"),method="internal",mode="wb")
+}
 ########################################################
-# extract data from the .pdf and store them into a csv
+# extract data from the .pdf and store them into a .Rdata
 ########################################################
 foreach(i= 1:length(lista_nom_comunas)) %dopar%{
   aux_comuna=lista_nom_comunas[i]  
