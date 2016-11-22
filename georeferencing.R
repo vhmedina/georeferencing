@@ -1,11 +1,10 @@
 ## Playing with ggmap
 # Increasing default memory of rJava
-Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre7')
+#Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre7') # If you are using windows
 options(java.parameters = "-Xmx5000m")
 
 # packages used
 library(rJava)
-library(githubinstall)
 library(pdftools)
 library(tabulizer)
 library(stringr)
@@ -14,11 +13,13 @@ library(dplyr)
 library(foreach)
 library(ggmap)
 
-# Get the names of each places
+# Get the names of each place
+Sys.setlocale("LC_ALL", "pt_PT.UTF-8")
 data=read_xml("http://web.servel.cl/archivos.xml")
 nom_comunas=data %>% xml_find_all("//nomcomuna")
 lista_nom_comunas=xml_text(nom_comunas)
-
+head(lista_nom_comunas)
+lista_nom_comunas=lista_nom_comunas[which(lista_nom_comunas %in% c("La Florida","Puerto Varas"))]
 ########################################################
 # extract data from the .pdf and store them into a csv
 ########################################################
