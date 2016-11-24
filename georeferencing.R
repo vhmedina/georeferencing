@@ -75,11 +75,13 @@ for (i in 1:nrow(sample)) {
 }
 
 # If you are using you API credential, you can create the following function to include it.
-get_geocode = function(location, api_key){
+library(rjson)
+library(RCurl)
+get_geocode = function(api_key, location){
   location = gsub(' ','+',location)
-  geo_data =getURL(paste("https://maps.googleapis.com/maps/api/geocode/json?address=",location,sprintf("&key=%s",api_key), sep=""))
-  geo_data=fromJSON(geo_data)
-  geo_data$results[[1]]$geometry$location
+  data =getURL(paste("https://maps.googleapis.com/maps/api/geocode/json?address=",location,sprintf("&key=%s",api_key), sep=""))
+  data=fromJSON(data)
+  data$results[[1]]$geometry$location
 }
 
 # Add the variables to the base
