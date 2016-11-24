@@ -12,6 +12,7 @@ library(xml2)
 library(dplyr)
 library(foreach)
 library(ggmap)
+library(ggplot2)
 
 # Get the names of each place
 Sys.setlocale("LC_ALL", "pt_PT.UTF-8")
@@ -64,9 +65,8 @@ sample=data_sample %>%
   sample_n(2300) %>% 
   mutate(address=paste0(direccion,", ",comuna))
 
-# Get the latitud and longitud for each address.
+# Get the latitud and longitud for each address 
 geo_reply = geocode(sample$address, output='all', messaging=TRUE, override_limit=TRUE)
-
 longitud=as.vector(NA)
 latitud=as.vector(NA)
 for (i in 1:nrow(sample)) {
@@ -74,17 +74,23 @@ for (i in 1:nrow(sample)) {
   latitud[i]=geo_reply[[i]]$results[[1]]$geometry$location$lat 
 }
 
+# If you are using you API credential, you can create the following function to include it.
+get_geocode = function(location, api_key){
+  location = gsub(' ','+',location)
+  geo_data =getURL(paste("https://maps.googleapis.com/maps/api/geocode/json?address=",location,sprintf("&key=%s",api_key), sep=""))
+  geo_data=fromJSON(geo_data)
+  geo_data$results[[1]]$geometry$location
+}
+
 # Add the variables to the base
 sample$longitud=longitud
 sample$latitud=latitud
 
 # Plotting
-santiagoMap=qmap("Comuna de Santiago,RM, Chile",zoom = 14, color = "bw", legend = "topleft")
-santiago_map+geom_point(data=sample,aes(x=longitud,y=latitud, color=sexo), size=1, alpha=0.5)
-
-santiago <- get_map('santiago, chile', zoom = 14)
-santiago_map <- ggmap(santiago, extent = "device", legend = "topleft")
+santiago = get_map('santiago, chile', zoom = 14)
+santiago_map = ggmap(santiago, extent = "device", legend = "topleft")
 
 santiago_map + stat_density2d(aes(x=longitud,y=latitud, fill = ..level..,alpha=..level..),
-                              size = 0.1, bins = 100, data = sample,geom = "polygon")+ theme(legend.position="none")
+                              size = 0.1, bins = 100, data = sample,geom = "polygon")+ theme(legend.position="none")+
+geom_point(aes(x=longitud,y=latitud),size = .1,data = sample)
 
